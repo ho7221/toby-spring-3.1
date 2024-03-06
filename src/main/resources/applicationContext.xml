@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.SimpleDriverDataSource">
+        <property name="driverClass" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost/spring"/>
+        <property name="username" value="root"/>
+        <property name="password" value="dbpass!!"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="userDao" class="toby.tutorial.user.dao.UserDaoJdbc">
+        <property name="dataSource" ref="dataSource" />
+        <property name="sqlService" ref="sqlService"/>
+    </bean>
+
+    <bean id="sqlService" class="toby.tutorial.user.service.SimpleSqlService">
+        <property name="sqlMap">
+            <map>
+                <entry key="add" value="insert into users(id, name, password, level, login, recommend, email) values(?, ?, ?, ?, ? ,?, ?)"/>
+                <entry key="get" value="select * from users where id = ?"/>
+                <entry key="getAll" value="select * from users order by id"/>
+                <entry key="deleteAll" value="delete from users"/>
+                <entry key="getCount" value="select count(*) from users"/>
+                <entry key="update" value="update users set name = ?, password = ?, level = ?, login = ?, recommend = ?, email = ? where id = ?"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="userService" class="toby.tutorial.user.service.UserServiceImpl">
+        <property name="userDao" ref="userDao"/>
+        <property name="mailSender" ref="mailSender"/>
+    </bean>
+
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="smtp.worksmobile.com"/>
+        <property name="port" value="587"/>
+        <property name="username" value="SMTP_USERNAME"/>
+        <property name="password" value="SMTP_KEY"/>
+    </bean>
+
+    <tx:annotation-driven />
+</beans>
